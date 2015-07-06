@@ -20,6 +20,6 @@ int main() {
 
 	grid.clearAll();
 	screen.render();
-	
+
 	return 0;
 }
