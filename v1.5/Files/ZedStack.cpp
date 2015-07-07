@@ -53,47 +53,47 @@ bool            szClassName[] = "ZedStackWindow";   // Name for the window class
 /**  G L O B A L   V A R I A B L E S  **/
 
 VOID thread (PVOID pVoid) {
-    Sleep(50);
-    _main_();
+    Sleep (50);
+    _main_ ();
 }
 void mayCallMain () {
     static bool started = false;
 
     if (!started) {
-        _beginthread(thread, 0, NULL);
+        _beginthread (thread, 0, NULL);
         started = true;
     }
 }
 void realFrame (int width, int height, int& retWidth, int& retHeight) {
     RECT farme = { 0, 0, width, height };
-    AdjustWindowRect(&frame, WS_OVERLAPPEDWINDOW, FLASE);
+    AdjustWindowRect (&frame, WS_OVERLAPPEDWINDOW, FLASE);
     retWidth = frame.right - frame.left;
     retHeight = frame.bottom - frame.top;
 }
 void newMemDC (int width, int height) {
     if (hDCMem != NULL) {
-		DeleteObject(hBitmap);
-		DeleteDC(hDCMem);
+		DeleteObject (hBitmap);
+		DeleteDC (hDCMem);
 	}
-	HDC hDC = GetDC(hWnd);
-	hDCMem = CreateCompatibleDC(hDC);
-	hBitmap = CreateCompatibleBitmap(hDC, width, height);
-	SelectObject(hDCMem, hBitmap);
-	SetBkMode(hDCMem, TRANSPARENT);
+	HDC hDC = GetDC (hWnd);
+	hDCMem = CreateCompatibleDC (hDC);
+	hBitmap = CreateCompatibleBitmap (hDC, width, height);
+	SelectObject (hDCMem, hBitmap);
+	SetBkMode (hDCMem, TRANSPARENT);
 }
 LRESULT CALLBACK windowProcedure (HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
 	switch (message) {
 	case WM_SIZE: {
 		RECT rect;
-		GetClientRect(hWnd, &rect);
+		GetClientRect (hWnd, &rect);
 		int width = rect.right - rect.left;
 		int height = rect.bottom - rect.top;
 
 		if (width == 0 && height == 0) break;
 
 		if (hDCMem == NULL || width != stdWidth || height != stdHeight) {
-			newMemDC(width, height);
-			mayCallMain();
+			newMemDC (width, height);
+			mayCallMain ();
 		}
 		break;
 	}
@@ -101,7 +101,7 @@ LRESULT CALLBACK windowProcedure (HWND hWnd, UINT message, WPARAM wParam, LPARAM
 		RECT* rect = (RECT*)lParam;
 
 		int width, height;
-		realFrame(stdWidth, stdHeight, width, height);
+		realFrame (stdWidth, stdHeight, width, height);
 
 		switch (wParam) {
 		case WMSZ_BOTTOM:		{ rect->bottom = rect->top + height; break; }
@@ -116,11 +116,11 @@ LRESULT CALLBACK windowProcedure (HWND hWnd, UINT message, WPARAM wParam, LPARAM
 	}
 	case WM_PAINT: {
 		PAINTSTRUCT paintStruct;
-		HDC hDC = BeginPaint(hWnd, &paintStruct);
-		SelectObject(hDCMem, hBitmap);
+		HDC hDC = BeginPaint (hWnd, &paintStruct);
+		SelectObject (hDCMem, hBitmap);
 
-		if (hBitmap != NULL) BitBlt(hDC, 0, 0, stdWidth, stdHeight, hDCMem, 0, 0, SRCCOPY);
-		EndPaint(hWnd, &paintStruct);
+		if (hBitmap != NULL) BitBlt (hDC, 0, 0, stdWidth, stdHeight, hDCMem, 0, 0, SRCCOPY);
+		EndPaint (hWnd, &paintStruct);
 		break;
 	}
 	case WM_KEYDOWN: {
@@ -150,21 +150,21 @@ LRESULT CALLBACK windowProcedure (HWND hWnd, UINT message, WPARAM wParam, LPARAM
 		//! NP-0 - NP-9:
 		keyValue |= (wParam >= 96 && wParam <= 105);
 
-		if (keyValue) _key.push(wParam);
+		if (keyValue) _key.push (wParam);
 		break;
 	}
 	case WM_MOUSEMOVE: {
 		TRACKMOUSEEVENT mouseEvent;
-		mouseEvent.cbSize = sizeof(TRACKMOUSEEVENT);
+		mouseEvent.cbSize = sizeof (TRACKMOUSEEVENT);
 		mouseEvent.hwndTrack = hWnd;
 		mouseEvent.dwFlags = TME_LEAVE; // TODO do some research about "TME_HOVER"
 		mouseEvent.dwHoverTime = HOVER_DEFAULT;
-		TrackMouseEvent(&mouseEvent);
+		TrackMouseEvent (&mouseEvent);
 
 		MOUSEINSIDE = true;
 
-		xMouseAxis = GET_X_LPARAM(lParam);
-		yMouseAxis = GET_Y_LPARAM(lParam);
+		xMouseAxis = GET_X_LPARAM (lParam);
+		yMouseAxis = GET_Y_LPARAM (lParam);
 
 		LBUTTON[UP]		=  !(wParam & MK_LBUTTON);
 		LBUTTON[DOWN]	=    wParam & MK_LBUTTON;
@@ -245,13 +245,13 @@ LRESULT CALLBACK windowProcedure (HWND hWnd, UINT message, WPARAM wParam, LPARAM
 		break;
 	}
 	case WM_DESTROY: {
-		DeleteObject(hBitmap);
-		DeleteDC(hDCMem);
-		PostQuitMessage(0);
+		DeleteObject (hBitmap);
+		DeleteDC (hDCMem);
+		PostQuitMessage (0);
 		break;
 	}
 	default: {
-		return DefWindowProc(hWnd, message, wParam, lParam);
+		return DefWindowProc (hWnd, message, wParam, lParam);
 	}
 	}
 	return 0;
@@ -263,23 +263,23 @@ int WINAPI WinMain (HINSTANCE hThisInstance, HINSTANCE hPrevInstance, LPSTR lpsz
 	wincl.lpszClassName = szClassName;
 	wincl.lpfnWndProc = windowProcedure;
 	wincl.style = CS_DBLCLKS;
-	wincl.cbSize = sizeof(WNDCLASSEX);
-	wincl.hIcon = LoadIcon(NULL, IDI_APPLICATION);
+	wincl.cbSize = sizeof (WNDCLASSEX);
+	wincl.hIcon = LoadIcon (NULL, IDI_APPLICATION);
 	//wincl.hIcon = LoadIcon(hThisInstance, MAKEINTRESOURCE(IDI_ICON1));
 	// TODO Create new logos, menus and toolbars for the application if necessary.
-	wincl.hIconSm = LoadIcon(NULL, IDI_APPLICATION);
+	wincl.hIconSm = LoadIcon (NULL, IDI_APPLICATION);
 	//wincl.hIconSm = LoadIcon(hThisInstance, MAKEINTRESOURCE(IDI_SMALL));
-	wincl.hCursor = LoadCursor(NULL, IDC_ARROW);
+	wincl.hCursor = LoadCursor (NULL, IDC_ARROW);
 	wincl.lpszMenuName = NULL;
 	wincl.cbClsExtra = 0;
 	wincl.cbWndExtra = 0;
-	wincl.hbrBackground = (HBRUSH)GetStockObject(BLACK_BRUSH);
+	wincl.hbrBackground = (HBRUSH)GetStockObject (BLACK_BRUSH);
 
-	if (!RegisterClassEx(&wincl)) return 0;
+	if (!RegisterClassEx (&wincl)) return 0;
 
 	int width, height;
-	realFrame(stdWidth, stdHeight, width, height);
-	hWnd = CreateWindowEx(
+	realFrame (stdWidth, stdHeight, width, height);
+	hWnd = CreateWindowEx (
 		0,					//! Basic window style.
 		szClassName,		//! Name of the class.
 		title,				//! Title.
@@ -293,12 +293,12 @@ int WINAPI WinMain (HINSTANCE hThisInstance, HINSTANCE hPrevInstance, LPSTR lpsz
 		hThisInstance,		//! Program Instance handler.
 		NULL);				//! No Window Creation data.
 	hBitmap = NULL;
-	ShowWindow(hWnd, nFunsterStil);
+	ShowWindow (hWnd, nFunsterStil);
 	MSG	messages;
 
-	while (GetMessage(&messages, NULL, 0, 0)) {
-		TranslateMessage(&messages);
-		DispatchMessage(&messages);
+	while (GetMessage (&messages, NULL, 0, 0)) {
+		TranslateMessage (&messages);
+		DispatchMessage (&messages);
 	}
 	return messages.wParam;
 }
@@ -314,8 +314,7 @@ namespace ZedStack {
         resize (width, height);
     }
     SCREEN::~SCREEN () {
-        this -> WIDTH = 0;
-        this -> HEIGHT = 0;
+        // Do nothing.
     }
     void SCREEN::getWidthAndHeight (int& width, int& height) {
         width = this -> WIDTH;
@@ -344,6 +343,10 @@ namespace ZedStack {
     void SCREEN::close () {
         Postmessage (hWnd, WM_CLOSE, 0, 0);
     }
+    void SCREEN::rewriteStandards (int& oldWidth, int& oldHeight, int newWidth, int newHeight) {
+        oldWidth = newWidth;
+        oldHeight = newHeight;
+    }
     int SCREEN::getWidth () {
         return this -> WIDTH;
     }
@@ -351,9 +354,176 @@ namespace ZedStack {
         return this -> HEIGHT;
     }
 
+
     MOUSE::MOUSE () {
         this -> XAXIS = xMouseAxis;
         this -> YAXIS = yMouseAxis;
     }
+    MOUSE::MOUSE (int& xAxis, int& yAxis) {
+        MOUSE();
+        xAxis = this -> XAXIS;
+        yAxis = this -> YAXIS;
+    }
+    MOUSE::~MOUSE () {
+        // Do nothing.
+    }
+    void MOUSE::getCoords (int& xAxis, int& yAxis) {
+        xAxis = this -> XAXIS;
+        yAxis = this -> YAXIS;
+    }
+    bool MOUSE::isInScreen () {
+        return MOUSE_INSIDE;
+    }
+    bool MOUSE::checkAndGetCoords (int& xAxis, int& yAxis) {
+        if (MOUSE_INSIDE) {
+            xAxis = xMouseAxis;
+            yAxis = yMouseAxis;
+            return true;
+        }
+        else {
+            xAxis = 0;
+            yAxis = 0;
+            return false;
+        }
+    }
+    bool MOUSE::lButtonUp () {
+        if (LBUTTON [UP]) return true;
+        else return false;
+    }
+    bool MOUSE::lButtonDown () {
+        if (LBUTTON [DOWN]) return true;
+        else return false;
+    }
+    bool MOUSE::lButtonDoubleClick () {
+        if (LBUTTON [DBLCK]) return true;
+        else return false;
+    }
+    bool MOUSE::lButtonSingleClick () {
+        if (LBUTTON [SNGCK_1] & LBUTTON [SNGCK_2]) {
+            LBUTTON [SNGCK_1] = false;
+            LBUTTON [SNGCK_2] = false;
+            return true;
+        }
+        else return false;
+    }
+    bool MOUSE::rButtonUp () {
+        if (RBUTTON [UP]) return true;
+        else return false;
+    }
+    bool MOUSE::rButtonDown () {
+        if (RBUTTON [DOWN]) return true;
+        else return false;
+    }
+    bool MOUSE::rButtonDoubleClick () {
+        if (RBUTTON [DBLCK]) return true;
+        else return false;
+    }
+    bool MOUSE::rbuttonSingleClick () {
+        if (RBUTTON [SNGCK_1] & RBUTTON [SNGCK_2]) {
+            RBUTTON [SNGCK_1] = false;
+            RBUTTON [SNGCK_2] = false;
+            return true;
+        }
+        else return false;
+    }
+    bool MOUSE::mButtonUp () {
+        if (MBUTTON [UP]) return true;
+        else return false;
+    }
+    bool MOUSE::mButtonDown () {
+        if (MBUTTON [DOWN]) return true;
+        else return false;
+    }
+    bool MOUSE::mButtonDoubleClick () {
+        if (MBUTTON [DBLCK]) return true;
+        else return false;
+    }
+    bool MOUSE::mbuttonSingleClick () {
+        if (MBUTTON [SNGCK_1] & MBUTTON [SNGCK_2]) {
+            MBUTTON [SNGCK_1] = false;
+            MBUTTON [SNGCK_2] = false;
+            return true;
+        }
+        else return false;
+    }
+    int MOUSE::getX () {
+        return this -> xMouseAxis;
+    }
+    int MOUSE::getY () {
+        return this -> yMouseAxis;
+    }
 
+    GRID::GRID () {
+        this -> WIDTH = 0;
+        this -> HEIGHT = 0;
+        this -> TILE_WIDTH = 0;
+        this -> TILE_HEIGHT = 0;
+        this -> TILE_AMOUNT = 0;
+        this -> COLUMNS = 0;
+        this -> ROWS = 0;
+    }
+    GRID::GRID (int rows, int columns, int tileSize) {
+        this -> WIDTH           = tileSize * columns;
+        this -> HEIGHT          = tileSize * rows;
+        this -> TILE_WIDTH      = tileSize;
+        this -> TILE_HEIGHT     = tileSize;
+        this -> TILE_AMOUNT     = rows * columns;
+        this -> COLUMNS         = columns;
+        this -> ROWS            = rows;
+    }
+    GRID::GRID (int rows, int columns, int tileWidth, int tileHeight) {
+        this -> WIDTH           = tileWidth * columns;
+        this -> HEIGHT          = tileHeight * rows;
+        this -> TILE_WIDTH      = tileWidth;
+        this -> TILE_HEIGHT     = tileHeight;
+        this -> TILE_AMOUNT     = rows * columns;
+        this -> COLUMNS         = columns;
+        this -> ROWS            = rows;
+    }
+    GRID::~GRID () {
+        // Do nothing.
+    }
+    void GRID::setRows (int rows) {
+        this -> ROWS = rows;
+    }
+    void GRID::setColumns (int columns) {
+        this -> COLUMNS = columns;
+    }
+    void GRID::setRowsAndColumns (int rows, int columns) {
+        setRows (rows);
+        setColumns (columns);
+    }
+    void GRID::setTileSize (int tileWidth, int tileHeight) {
+        this -> TILE_WIDTH = tileSize;
+        this -> TILE_HEIGHT = tileSize;
+    }
+    void GRID::setTileSize (int tileSize) {
+        setTileSize (tileSize, tileSize);
+    }
+    void GRID::load (ZS_COLORS C) {
+        for (size_t y = 0; y < getHeight (); y += getTileHeight ()) {
+            line (0, y, getWidth () + 1, 1, SOLID, C);
+        }
+        for (size_t x = 0; x < getWidth (); x += getTileWidth ()) {
+            line (x, 0, x, getHeight (), 1, SOLID, C);
+        }
+    }
+    void GRID::load () {
+        load (CURRENT_COLOR);
+    }
+    void GRID::renderTile (int xTileAxis, int yTileAxis, ZS_COLORS C) {
+        rectangle (
+            RE_D_S,
+            FILLED,
+            xTileAxis * getTileWidth (),
+            yTileAxis * getTileHeight (),
+            getTileWidth (),
+            getTileHeight (),
+            0,
+            C);
+    }
+    void GRID::renderTile (int xTileAxis, int yTileAxis) {
+        renderTile (xTileAxis, yTileAxis, CURRENT_COLOR);
+    }
+    
 } /* ZedStack */

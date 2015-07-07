@@ -26,6 +26,7 @@
 int _main_();
 
 namespace ZedStack {
+    // TODO: Add the "KEYBOARD", "TABLE" and "PIXEL_GRID" classes.
     class SCREEN {
     private:
         int WIDTH;
@@ -85,27 +86,27 @@ namespace ZedStack {
         int TILE_WIDTH;
         int TILE_HEIGHT;
         int TILE_AMOUNT;
-		int COLUMS_AMOUNT;
-		int ROWS_AMOUNT;
+		int COLUMNS;
+		int ROWS;
     public:
         GRID ();
-        GRID(int rows, int colums, int tileSize);
-        GRID(int rows, int colums, int tileWidth, int tileHeight);
+        GRID (int rows, int columns, int tileSize);
+        GRID (int rows, int columns, int tileWidth, int tileHeight);
         virtual ~GRID ();
 
-        void setRows(int rows);
-		void setColums(int colums);
-		void setRowsAndColums(int rows, int colums);
-		void setTileSize(int tileWidth, int tileHeight);
-		void setTileSize(int tileSize);
+        void setRows (int rows);
+		void setColumns (int columns);
+		void setRowsAndColumns (int rows, int columns);
+		void setTileSize (int tileWidth, int tileHeight);
+		void setTileSize (int tileSize);
 
-		void load();
-		void load(ZS_COLORS C);
+		void load ();
+		void load (ZS_COLORS C);
 
-		void renderTile(int xTileAxis, int yTileAxis);
 		void renderTile(int xTileAxis, int yTileAxis, ZS_COLORS C);
-		void renderTile(int tile);
+		void renderTile(int xTileAxis, int yTileAxis);
 		void renderTile(int tile, ZS_COLORS C);
+		void renderTile(int tile);
 
         void writeTile(int xTileAxis, int yTileAxis, std::string text);
         void writeTile(int xTileAxis, int yTileAxis, std::string text, ZS_COLORS C);
@@ -125,7 +126,7 @@ namespace ZedStack {
 		int getTileWidth();
 		int getTileHeight();
 		int getRows();
-		int getColums();
+		int getColumns();
     };
 
     void square			(SQ_FIGURE_TYPE FG, ZS_LINE_TYPE LT, int xAxis, int yAxis, int size,  int thickness);
