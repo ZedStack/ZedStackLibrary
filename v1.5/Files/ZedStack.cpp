@@ -33,7 +33,7 @@
 #include "Enum.h"
 #include "Draw.h"
 
-LRESULT CALLBACK windowProcedure(HWND, UINT, WPARAM, LPARAM);
+LRESULT CALLBACK windowProcedure (HWND, UINT, WPARAM, LPARAM);
 
 /**  G L O B A L   V A R I A B L E S  **/
 HWND            hWnd;                               // Main screen.
@@ -53,27 +53,27 @@ bool            szClassName[] = "ZedStackWindow";   // Name for the window class
 /**  G L O B A L   V A R I A B L E S  **/
 
 VOID thread (PVOID pVoid) {
-    Sleep(50);
-    _main_();
+    Sleep (50);
+    _main_ ();
 }
 void mayCallMain () {
     static bool started = false;
 
     if (!started) {
-        _beginthread(thread, 0, NULL);
+        _beginthread (thread, 0, NULL);
         started = true;
     }
 }
 void realFrame (int width, int height, int& retWidth, int& retHeight) {
     RECT farme = { 0, 0, width, height };
-    AdjustWindowRect(&frame, WS_OVERLAPPEDWINDOW, FLASE);
+    AdjustWindowRect (&frame, WS_OVERLAPPEDWINDOW, FLASE);
     retWidth = frame.right - frame.left;
     retHeight = frame.bottom - frame.top;
 }
 void newMemDC (int width, int height) {
     if (hDCMem != NULL) {
-		DeleteObject(hBitmap);
-		DeleteDC(hDCMem);
+		DeleteObject (hBitmap);
+		DeleteDC (hDCMem);
 	}
 	HDC hDC = GetDC(hWnd);
 	hDCMem = CreateCompatibleDC(hDC);
@@ -85,15 +85,15 @@ LRESULT CALLBACK windowProcedure (HWND hWnd, UINT message, WPARAM wParam, LPARAM
 	switch (message) {
 	case WM_SIZE: {
 		RECT rect;
-		GetClientRect(hWnd, &rect);
+		GetClientRect (hWnd, &rect);
 		int width = rect.right - rect.left;
 		int height = rect.bottom - rect.top;
 
 		if (width == 0 && height == 0) break;
 
 		if (hDCMem == NULL || width != stdWidth || height != stdHeight) {
-			newMemDC(width, height);
-			mayCallMain();
+			newMemDC (width, height);
+			mayCallMain ();
 		}
 		break;
 	}
@@ -101,7 +101,7 @@ LRESULT CALLBACK windowProcedure (HWND hWnd, UINT message, WPARAM wParam, LPARAM
 		RECT* rect = (RECT*)lParam;
 
 		int width, height;
-		realFrame(stdWidth, stdHeight, width, height);
+		realFrame (stdWidth, stdHeight, width, height);
 
 		switch (wParam) {
 		case WMSZ_BOTTOM:		{ rect->bottom = rect->top + height; break; }
@@ -116,11 +116,11 @@ LRESULT CALLBACK windowProcedure (HWND hWnd, UINT message, WPARAM wParam, LPARAM
 	}
 	case WM_PAINT: {
 		PAINTSTRUCT paintStruct;
-		HDC hDC = BeginPaint(hWnd, &paintStruct);
-		SelectObject(hDCMem, hBitmap);
+		HDC hDC = BeginPaint (hWnd, &paintStruct);
+		SelectObject (hDCMem, hBitmap);
 
-		if (hBitmap != NULL) BitBlt(hDC, 0, 0, stdWidth, stdHeight, hDCMem, 0, 0, SRCCOPY);
-		EndPaint(hWnd, &paintStruct);
+		if (hBitmap != NULL) BitBlt (hDC, 0, 0, stdWidth, stdHeight, hDCMem, 0, 0, SRCCOPY);
+		EndPaint (hWnd, &paintStruct);
 		break;
 	}
 	case WM_KEYDOWN: {
@@ -155,16 +155,16 @@ LRESULT CALLBACK windowProcedure (HWND hWnd, UINT message, WPARAM wParam, LPARAM
 	}
 	case WM_MOUSEMOVE: {
 		TRACKMOUSEEVENT mouseEvent;
-		mouseEvent.cbSize = sizeof(TRACKMOUSEEVENT);
+		mouseEvent.cbSize = sizeof (TRACKMOUSEEVENT);
 		mouseEvent.hwndTrack = hWnd;
 		mouseEvent.dwFlags = TME_LEAVE; // TODO do some research about "TME_HOVER"
 		mouseEvent.dwHoverTime = HOVER_DEFAULT;
-		TrackMouseEvent(&mouseEvent);
+		TrackMouseEvent (&mouseEvent);
 
 		MOUSEINSIDE = true;
 
-		xMouseAxis = GET_X_LPARAM(lParam);
-		yMouseAxis = GET_Y_LPARAM(lParam);
+		xMouseAxis = GET_X_LPARAM (lParam);
+		yMouseAxis = GET_Y_LPARAM (lParam);
 
 		LBUTTON[UP]		=  !(wParam & MK_LBUTTON);
 		LBUTTON[DOWN]	=    wParam & MK_LBUTTON;
@@ -245,13 +245,13 @@ LRESULT CALLBACK windowProcedure (HWND hWnd, UINT message, WPARAM wParam, LPARAM
 		break;
 	}
 	case WM_DESTROY: {
-		DeleteObject(hBitmap);
-		DeleteDC(hDCMem);
-		PostQuitMessage(0);
+		DeleteObject (hBitmap);
+		DeleteDC (hDCMem);
+		PostQuitMessage (0);
 		break;
 	}
 	default: {
-		return DefWindowProc(hWnd, message, wParam, lParam);
+		return DefWindowProc (hWnd, message, wParam, lParam);
 	}
 	}
 	return 0;
@@ -263,23 +263,23 @@ int WINAPI WinMain (HINSTANCE hThisInstance, HINSTANCE hPrevInstance, LPSTR lpsz
 	wincl.lpszClassName = szClassName;
 	wincl.lpfnWndProc = windowProcedure;
 	wincl.style = CS_DBLCLKS;
-	wincl.cbSize = sizeof(WNDCLASSEX);
-	wincl.hIcon = LoadIcon(NULL, IDI_APPLICATION);
-	//wincl.hIcon = LoadIcon(hThisInstance, MAKEINTRESOURCE(IDI_ICON1));
+	wincl.cbSize = sizeof (WNDCLASSEX);
+	wincl.hIcon = LoadIcon (NULL, IDI_APPLICATION);
+	//wincl.hIcon = LoadIcon (hThisInstance, MAKEINTRESOURCE(IDI_ICON1));
 	// TODO Create new logos, menus and toolbars for the application if necessary.
-	wincl.hIconSm = LoadIcon(NULL, IDI_APPLICATION);
-	//wincl.hIconSm = LoadIcon(hThisInstance, MAKEINTRESOURCE(IDI_SMALL));
-	wincl.hCursor = LoadCursor(NULL, IDC_ARROW);
+	wincl.hIconSm = LoadIcon (NULL, IDI_APPLICATION);
+	//wincl.hIconSm = LoadIcon (hThisInstance, MAKEINTRESOURCE(IDI_SMALL));
+	wincl.hCursor = LoadCursor (NULL, IDC_ARROW);
 	wincl.lpszMenuName = NULL;
 	wincl.cbClsExtra = 0;
 	wincl.cbWndExtra = 0;
-	wincl.hbrBackground = (HBRUSH)GetStockObject(BLACK_BRUSH);
+	wincl.hbrBackground = (HBRUSH)GetStockObject (BLACK_BRUSH);
 
-	if (!RegisterClassEx(&wincl)) return 0;
+	if (!RegisterClassEx (&wincl)) return 0;
 
 	int width, height;
-	realFrame(stdWidth, stdHeight, width, height);
-	hWnd = CreateWindowEx(
+	realFrame (stdWidth, stdHeight, width, height);
+	hWnd = CreateWindowEx (
 		0,					//! Basic window style.
 		szClassName,		//! Name of the class.
 		title,				//! Title.
@@ -293,12 +293,12 @@ int WINAPI WinMain (HINSTANCE hThisInstance, HINSTANCE hPrevInstance, LPSTR lpsz
 		hThisInstance,		//! Program Instance handler.
 		NULL);				//! No Window Creation data.
 	hBitmap = NULL;
-	ShowWindow(hWnd, nFunsterStil);
+	ShowWindow (hWnd, nFunsterStil);
 	MSG	messages;
 
-	while (GetMessage(&messages, NULL, 0, 0)) {
-		TranslateMessage(&messages);
-		DispatchMessage(&messages);
+	while (GetMessage (&messages, NULL, 0, 0)) {
+		TranslateMessage (&messages);
+		DispatchMessage (&messages);
 	}
 	return messages.wParam;
 }

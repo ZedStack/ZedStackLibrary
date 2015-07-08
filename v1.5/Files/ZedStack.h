@@ -23,7 +23,7 @@
 #include <windows.h>
 
 #define main _main_
-int _main_();
+int _main_ ();
 
 namespace ZedStack {
     class SCREEN {
@@ -31,20 +31,20 @@ namespace ZedStack {
         int WIDTH;
         int HEIGHT;
 
-        void rewriteStandards(int& oldWidth, int& oldHeight, int newWidth, int newHeight);
+        void rewriteStandards (int& oldWidth, int& oldHeight, int newWidth, int newHeight);
     public:
-        SCREEN();
+        SCREEN ();
         SCREEN (int width, int height);
         virtual ~SCREEN ();
 
-        void getWidthAndHeight(int& width, int& Height);
-        void resize(int newWidth, int newHeight);
-        void render();
-        void clear();
-        void close();
+        void getWidthAndHeight (int& width, int& Height);
+        void resize (int newWidth, int newHeight);
+        void render ();
+        void clear ();
+        void close ();
 
-        int getWidth();
-        int getHeight();
+        int getWidth ();
+        int getHeight ();
     };
 
     class MOUSE {
@@ -52,30 +52,30 @@ namespace ZedStack {
         int XAXIS;
         int YAXIS;
     public:
-        MOUSE();
+        MOUSE ();
         MOUSE (int& xAxis, int& yAxis);
         virtual ~MOUSE ();
 
-        void getCoords(int& xAxis, int& yAxis);
+        void getCoords (int& xAxis, int& yAxis);
 
-        bool isInScreen();
-        bool checkAndGetCoords(int& xAxis, int& yAxis);
+        bool isInScreen ();
+        bool checkAndGetCoords (int& xAxis, int& yAxis);
 
-        bool lButtonUp();
-        bool lButtonDown();
-        bool lButtonDoubleClick();
-        bool lButtonSingleClick();
-        bool rButtonUp();
-        bool rButtonDown();
-        bool rButtonDoubleClick();
-        bool rbuttonSingleClick();
-        bool mButtonUp();
-        bool mButtonDown();
-        bool mButtonDoubleClick();
-        bool mbuttonSingleClick();
+        bool lButtonUp ();
+        bool lButtonDown ();
+        bool lButtonDoubleClick ();
+        bool lButtonSingleClick ();
+        bool rButtonUp ();
+        bool rButtonDown ();
+        bool rButtonDoubleClick ();
+        bool rbuttonSingleClick ();
+        bool mButtonUp ();
+        bool mButtonDown ();
+        bool mButtonDoubleClick ();
+        bool mbuttonSingleClick ();
 
-        int getX();
-        int getY();
+        int getX ();
+        int getY ();
     };
 
     class GRID {
