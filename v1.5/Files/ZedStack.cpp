@@ -265,17 +265,14 @@ int WINAPI WinMain (HINSTANCE hThisInstance, HINSTANCE hPrevInstance, LPSTR lpsz
 	wincl.style = CS_DBLCLKS;
 	wincl.cbSize = sizeof (WNDCLASSEX);
 	wincl.hIcon = LoadIcon (NULL, IDI_APPLICATION);
-<<<<<<< HEAD
 	//wincl.hIcon = LoadIcon (hThisInstance, MAKEINTRESOURCE(IDI_ICON1));
 	// TODO Create new logos, menus and toolbars for the application if necessary.
 	wincl.hIconSm = LoadIcon (NULL, IDI_APPLICATION);
 	//wincl.hIconSm = LoadIcon (hThisInstance, MAKEINTRESOURCE(IDI_SMALL));
-=======
 	//wincl.hIcon = LoadIcon(hThisInstance, MAKEINTRESOURCE(IDI_ICON1));
 	// TODO Create new logos, menus and toolbars for the application if necessary.
 	wincl.hIconSm = LoadIcon (NULL, IDI_APPLICATION);
 	//wincl.hIconSm = LoadIcon(hThisInstance, MAKEINTRESOURCE(IDI_SMALL));
->>>>>>> origin/master
 	wincl.hCursor = LoadCursor (NULL, IDC_ARROW);
 	wincl.lpszMenuName = NULL;
 	wincl.cbClsExtra = 0;
@@ -360,7 +357,6 @@ namespace ZedStack {
     int SCREEN::getHeight () {
         return this -> HEIGHT;
     }
-
 
     MOUSE::MOUSE () {
         this -> XAXIS = xMouseAxis;
@@ -532,5 +528,12 @@ namespace ZedStack {
     void GRID::renderTile (int xTileAxis, int yTileAxis) {
         renderTile (xTileAxis, yTileAxis, CURRENT_COLOR);
     }
-    
+    void GRID::renderTile (int tile, ZS_COLORS C) {
+        renderTile (tile % getColumns (), tile * getRows (), C);
+    }
+    void GRID::renderTile (int tile) {
+        renderTile (tile, CURRENT_COLOR);
+    }
+    // TODO: Finish this class. branch and create a "master" class "TABLE_BASIC" for "GRID", "PIXEL_GRID" and "TABLE".
+
 } /* ZedStack */
