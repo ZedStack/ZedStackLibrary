@@ -22,6 +22,9 @@
 #include <iostream>
 #include <windows.h>
 
+// Extra libraries in the project.
+#include "Enum.h"
+
 #define main _main_
 int _main_ ();
 
@@ -108,10 +111,10 @@ namespace ZedStack {
 		void renderTile(int tile, ZS_COLORS C);
 		void renderTile(int tile);
 
-        void writeTile(int xTileAxis, int yTileAxis, std::string text, ZS_COLORS C, ZS_TEXT_ALIGN TA);
-        void writeTile(int xTileAxis, int yTileAxis, std::string text, ZS_TEXT_ALIGN TA);
-        void writeTile(int tile, std::string text, ZS_COLORS C, ZS_TEXT_ALIGN TA);
-        void writeTile(int tile, std::string text, ZS_TEXT_ALIGN TA);
+        void writeTile(int xTileAxis, int yTileAxis, std::string line, ZS_COLORS C, ZS_TEXT_ALIGN TA);
+        void writeTile(int xTileAxis, int yTileAxis, std::string line, ZS_TEXT_ALIGN TA);
+        void writeTile(int tile, std::string line, ZS_COLORS C, ZS_TEXT_ALIGN TA);
+        void writeTile(int tile, std::string line, ZS_TEXT_ALIGN TA);
 
 		void clear();
 		void clearAll();
@@ -144,8 +147,8 @@ namespace ZedStack {
     void roundRectangle	(RE_FIGURE_TYPE FG, ZS_LINE_TYPE LT, int xAxis, int yAxis, int wSize, int hSize, int thickness, int wRound, int hRound);
     void roundRectangle	(RE_FIGURE_TYPE FG, ZS_LINE_TYPE LT, int xAxis, int yAxis, int wSize, int hSize, int thickness, int wRound, int hRound, ZS_COLORS C);
 
-    void line	(int xAxis,  int yAxis,  int size,   int angle,  int thickness,  ZS_LINE_TYPE LT);
-	void line	(int xAxis,  int yAxis,  int size,   int angle,  int thickness,  ZS_LINE_TYPE LT, ZS_COLORS C);
+    //void line	(int xAxis,  int yAxis,  int size,   int angle,  int thickness,  ZS_LINE_TYPE LT);
+	//void line	(int xAxis,  int yAxis,  int size,   int angle,  int thickness,  ZS_LINE_TYPE LT, ZS_COLORS C);
 	void line	(int xStart, int yStart, int xFinal, int yFinal, int thickness, ZS_LINE_TYPE LT);
 	void line	(int xStart, int yStart, int xFinal, int yFinal, int thickness, ZS_LINE_TYPE LT, ZS_COLORS C);
 	void text	(int xAXis,  int yAxis,  const std::string line);

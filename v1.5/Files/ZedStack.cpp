@@ -20,6 +20,7 @@
 #include "ZedStack.h"
 
 // Needed libraries.
+#include <iostream>
 #include <sstream>
 #include <Windows.h>
 #include <windowsx.h>
@@ -49,7 +50,7 @@ bool            mouseIsInScreen;                    // Returns true if the mouse
 bool            lButton[5];                         // Left button of the mouse.
 bool            rButton[5];                         // Right button of the mouse.
 bool            mButton[5];                         // Middle button of the mouse.
-bool            szClassName[] = "ZedStackWindow";   // Name for the window class.
+char            szClassName[] = "ZedStackWindow";   // Name for the window class.
 /**  G L O B A L   V A R I A B L E S  **/
 
 VOID thread (PVOID pVoid) {
@@ -65,8 +66,8 @@ void mayCallMain () {
     }
 }
 void realFrame (int width, int height, int& retWidth, int& retHeight) {
-    RECT farme = { 0, 0, width, height };
-    AdjustWindowRect (&frame, WS_OVERLAPPEDWINDOW, FLASE);
+    RECT frame = { 0, 0, width, height };
+    AdjustWindowRect (&frame, WS_OVERLAPPEDWINDOW, FALSE);
     retWidth = frame.right - frame.left;
     retHeight = frame.bottom - frame.top;
 }
@@ -161,7 +162,7 @@ LRESULT CALLBACK windowProcedure (HWND hWnd, UINT message, WPARAM wParam, LPARAM
     		mouseEvent.dwHoverTime = HOVER_DEFAULT;
     		TrackMouseEvent (&mouseEvent);
 
-    		MOUSEINSIDE = true;
+    		MOUSE_INSIDE = true;
 
     		xMouseAxis = GET_X_LPARAM (lParam);
     		yMouseAxis = GET_Y_LPARAM (lParam);
@@ -175,7 +176,7 @@ LRESULT CALLBACK windowProcedure (HWND hWnd, UINT message, WPARAM wParam, LPARAM
     		break;
     	}
     	case WM_MOUSELEAVE: {
-    		MOUSEINSIDE = false;
+    		MOUSE_INSIDE = false;
     		break;
     	}
     	case WM_MBUTTONUP: {
@@ -345,7 +346,7 @@ namespace ZedStack {
         DeleteObject (hBrush);
     }
     void SCREEN::close () {
-        Postmessage (hWnd, WM_CLOSE, 0, 0);
+        PostMessage (hWnd, WM_CLOSE, 0, 0);
     }
     void SCREEN::rewriteStandards (int& oldWidth, int& oldHeight, int newWidth, int newHeight) {
         oldWidth = newWidth;
@@ -450,10 +451,10 @@ namespace ZedStack {
         else return false;
     }
     int MOUSE::getX () {
-        return this -> xMouseAxis;
+        return xMouseAxis;
     }
     int MOUSE::getY () {
-        return this -> yMouseAxis;
+        return yMouseAxis;
     }
 
     GRID::GRID () {
@@ -497,17 +498,17 @@ namespace ZedStack {
         setColumns (columns);
     }
     void GRID::setTileSize (int tileWidth, int tileHeight) {
-        this -> TILE_WIDTH = tileSize;
-        this -> TILE_HEIGHT = tileSize;
+        this -> TILE_WIDTH = tileWidth;
+        this -> TILE_HEIGHT = tileHeight;
     }
     void GRID::setTileSize (int tileSize) {
         setTileSize (tileSize, tileSize);
     }
     void GRID::load (ZS_COLORS C) {
-        for (size_t y = 0; y < getHeight (); y += getTileHeight ()) {
-            line (0, y, getWidth () + 1, 1, SOLID, C);
+        for (int y = 0; y < getHeight (); y += getTileHeight ()) {
+            line (0, y, getWidth () + 1, y, 1, SOLID, C);
         }
-        for (size_t x = 0; x < getWidth (); x += getTileWidth ()) {
+        for (int x = 0; x < getWidth (); x += getTileWidth ()) {
             line (x, 0, x, getHeight (), 1, SOLID, C);
         }
     }
@@ -535,9 +536,9 @@ namespace ZedStack {
         renderTile (tile, CURRENT_COLOR);
     }
     // TODO: Finish this class. branch and create a "master" class "TABLE_BASIC" for "GRID", "PIXEL_GRID" and "TABLE".
-    void GRID::writeTile(int xTileAxis, int yTileAxis, std::string text, ZS_COLORS C, ZS_TEXT_ALIGN TA) {
+    void GRID::writeTile(int xTileAxis, int yTileAxis, std::string line, ZS_COLORS C, ZS_TEXT_ALIGN TA) {
         int xAxis, yAxis;
-        getCoordsFromTile (xTileAxis, yTileAxis, xStart, yStart);
+        getCoordsFromTile (xTileAxis, yTileAxis, xAxis, yAxis);
 
         switch (TA) {
             case TOP_LEFT: { break; /* Do nothing... (by default) */ }
@@ -549,12 +550,12 @@ namespace ZedStack {
             case BOTTOM_CENTER: { xAxis += getTileWidth () / 2; yAxis += getTileHeight (); break; }
 
             case TOP: { break; /* Do nothing... (By default) */ }
-            case LEFT: { break; /* Do nothing... (By defua  ) */ }
+            case LEFT: { break; /* Do nothing... (By default  ) */ }
             case BOTTOM: { yAxis += getTileHeight (); break; }
             case RIGHT: { xAxis += getTileWidth (); break; }
             case CENTER: { xAxis += getTileWidth () / 2; break; }
         }
-        text (xAxis, yAxis, text, TA, C);
+		text (xAxis, yAxis, line);
     }
     void GRID::writeTile (int xTileAxis, int yTileAxis, std::string text, ZS_TEXT_ALIGN TA) {
         writeTile (xTileAxis, yTileAxis, text, CURRENT_COLOR, TA);
@@ -565,7 +566,7 @@ namespace ZedStack {
         yAxis = (tile / getColumns ()) * getTileHeight ();
     }
     void GRID::getCoordsFromTile (int tile, int& xStart, int& yStart, int& xFinal, int& yFinal) {
-        getTileFromCoords (tile, xStart, yStart);
+        getCoordsFromTile (tile, xStart, yStart);
         xFinal = xStart + getTileWidth ();
         yFinal = yStart + getTileHeight ();
     }
@@ -573,7 +574,7 @@ namespace ZedStack {
         getCoordsFromTile (getTileFromCoords (xTileAxis, yTileAxis), xAxis, yAxis);
     }
     void GRID::getCoordsFromTile (int xTileAxis, int yTileAxis, int& xStart, int& yStart, int& xFinal, int& yFinal) {
-        getTileFromCoords (xTileAxis, yTileAxis, xStart, yStart);
+        getCoordsFromTile (xTileAxis, yTileAxis, xStart, yStart);
         xFinal = xStart + getTileWidth ();
         yFinal = yStart + getTileHeight ();
     }
@@ -598,4 +599,423 @@ namespace ZedStack {
     int GRID::getColumns () {
         return this -> COLUMNS;
     }
+
+    void SQ_figureTypeSelector (SQ_FIGURE_TYPE figureType, COORDS& figure, int xAxis, int yAxis, int size, bool round, int wRound, int hRound) {
+        if (round) {
+            figure.wRound = wRound;
+            figure.hRound = hRound;
+        }
+        switch (figureType) {
+            case SQ_R: {
+                figure.xStart = xAxis - size;
+                figure.yStart = yAxis - size;
+                figure.xFinal = xAxis + size;
+                figure.yFinal = yAxis + size;
+                break;
+            }
+            case SQ_D: {
+                figure.xStart = xAxis - halfFloat (size);
+                figure.yStart = yAxis - halfFloat (size);
+                figure.xFinal = xAxis + halfFloat (size);
+                figure.yFinal = yAxis + halfFloat (size);
+                break;
+            }
+            case SQ_R_S: {
+                figure.xStart = xAxis;
+                figure.yStart = yAxis;
+                figure.xFinal = xAxis + doubleFloat (size);
+                figure.yFinal = yAxis + doubleFloat (size);
+                break;
+            }
+            case SQ_R_F: {
+                figure.xStart = xAxis - doubleFloat (size);
+                figure.yStart = yAxis - doubleFloat (size);
+                figure.xFinal = xAxis;
+                figure.yFinal = yAxis;
+                break;
+            }
+            case SQ_D_S: {
+                figure.xStart = xAxis;
+                figure.yStart = yAxis;
+                figure.xFinal = xAxis + size;
+                figure.yFinal = yAxis + size;
+                break;
+            }
+            case SQ_D_F: {
+                figure.xStart = xAxis - size;
+                figure.yStart = yAxis - size;
+                figure.xFinal = xAxis;
+                figure.yFinal = yAxis;
+                break;
+        }
+        }
+    }
+    void RE_figureTypeSelector (RE_FIGURE_TYPE figureType, COORDS& figure, int xAxis, int yAxis, int wSize, int hSize, bool round, int wRound, int hRound) {
+        if (round) {
+            figure.wRound = wRound;
+            figure.hRound = hRound;
+        }
+        switch (figureType) {
+            case ZedStack::RE_FREE: {
+                figure.xStart = xAxis;
+                figure.yStart = yAxis;
+                figure.xFinal = wSize;
+                figure.yFinal = hSize;
+                break;
+            }
+            case ZedStack::RE_R: {
+                figure.xStart = xAxis - wSize;
+                figure.yStart = yAxis - hSize;
+                figure.xFinal = xAxis + wSize;
+                figure.yFinal = yAxis + hSize;
+                break;
+            }
+            case ZedStack::RE_D: {
+                figure.xStart = xAxis - halfFloat (wSize);
+                figure.yStart = yAxis - halfFloat (hSize);
+                figure.xFinal = xAxis + halfFloat (wSize);
+                figure.yFinal = yAxis + halfFloat (hSize);
+                break;
+            }
+            case ZedStack::RE_R_S: {
+                figure.xStart = xAxis;
+                figure.yStart = yAxis;
+                figure.xFinal = xAxis + doubleFloat (wSize);
+                figure.yFinal = yAxis + doubleFloat (hSize);
+                break;
+            }
+            case ZedStack::RE_R_F: {
+                figure.xStart = xAxis - doubleFloat (wSize);
+                figure.yStart = yAxis - doubleFloat (hSize);
+                figure.xFinal = xAxis;
+                figure.yFinal = yAxis;
+                break;
+            }
+            case ZedStack::RE_D_S: {
+                figure.xStart = xAxis;
+                figure.yStart = yAxis;
+                figure.xFinal = xAxis + wSize;
+                figure.yFinal = yAxis + hSize;
+                break;
+            }
+            case ZedStack::RE_D_F: {
+                figure.xStart = xAxis - wSize;
+                figure.yStart = yAxis - hSize;
+                figure.xFinal = wSize;
+                figure.yFinal = hSize;
+                break;
+            }
+        }
+    }
+    void CI_figureTypeSelector (CI_FIGURE_TYPE figureType, COORDS& figure, int xAxis, int yAxis, int size) {
+        switch (figureType) {
+            case ZedStack::CI_R: {
+                figure.xAxis = xAxis;
+                figure.yAxis = yAxis;
+                figure.radius = size;
+                break;
+            }
+            case ZedStack::CI_D: {
+                figure.xAxis = xAxis;
+                figure.yAxis = yAxis;
+                figure.radius = halfFloat (size);
+                break;
+            }
+            case ZedStack::CI_R_S: {
+                figure.xAxis = xAxis + size;
+                figure.yAxis = yAxis + size;
+                figure.radius = size;
+                break;
+            }
+            case ZedStack::CI_R_F: {
+                figure.xAxis = xAxis - size;
+                figure.yAxis = yAxis - size;
+                figure.radius = size;
+                break;
+            }
+            case ZedStack::CI_D_S: {
+                figure.xAxis = xAxis + halfFloat (size);
+                figure.yAxis = yAxis + halfFloat (size);
+                figure.radius = halfFloat (size);
+                break;
+            }
+            case ZedStack::CI_D_F: {
+                figure.xAxis = xAxis - halfFloat (size);
+                figure.yAxis = yAxis - halfFloat (size);
+                figure.radius = halfFloat (size);
+                break;
+            }
+        }
+    }
+    void EL_figureTypeSelector (RE_FIGURE_TYPE figureType, COORDS& figure, int xAxis, int yAxis, int wSize, int hSize) {
+        switch (figureType) {
+            case ZedStack::RE_FREE: {
+                figure.xStart = xAxis;
+                figure.yStart = yAxis;
+                figure.xFinal = wSize;
+                figure.yFinal = hSize;
+                break;
+            }
+            case ZedStack::RE_R: {
+                figure.xStart = xAxis - wSize;
+                figure.yStart = yAxis - hSize;
+                figure.xFinal = xAxis + wSize;
+                figure.yFinal = yAxis + hSize;
+                break;
+            }
+            case ZedStack::RE_D: {
+                figure.xStart = xAxis - halfFloat (wSize);
+                figure.yStart = yAxis - halfFloat (hSize);
+                figure.xFinal = xAxis + halfFloat (wSize);
+                figure.yFinal = yAxis + halfFloat (hSize);
+                break;
+            }
+            case ZedStack::RE_R_S: {
+                figure.xStart = xAxis;
+                figure.yStart = yAxis;
+                figure.xFinal = xAxis + doubleFloat (wSize);
+                figure.yFinal = yAxis + doubleFloat (hSize);
+                break;
+            }
+            case ZedStack::RE_R_F: {
+                figure.xStart = xAxis - doubleFloat (wSize);
+                figure.yStart = yAxis - doubleFloat (hSize);
+                figure.xFinal = xAxis;
+                figure.yFinal = yAxis;
+                break;
+            }
+            case ZedStack::RE_D_S: {
+                figure.xStart = xAxis;
+                figure.yStart = yAxis;
+                figure.xFinal = xAxis + wSize;
+                figure.yFinal = yAxis + hSize;
+                break;
+            }
+            case ZedStack::RE_D_F: {
+                figure.xStart = xAxis - wSize;
+                figure.yStart = yAxis - hSize;
+                figure.xFinal = xAxis;
+                figure.yFinal = yAxis;
+                break;
+            }
+        }
+    }
+    void lineTypeSelector (ZS_LINE_TYPE lineType, HPEN& pen, int thickness, COLORREF color) {
+		switch (lineType) {
+    		case SOLID:
+    		case BORDER: {
+    			pen = CreatePen  (PS_SOLID, thickness, color);
+    			break;
+            }
+    		case DOTTED: {
+    			pen = CreatePen  (PS_DOT, thickness, color);
+    			break;
+            }
+    		case DASHED: {
+    			pen = CreatePen  (PS_DASH, thickness, color);
+    			break;
+            }
+    		case DASHED_DOT: {
+    			pen = CreatePen  (PS_DASHDOT, thickness, color);
+    			break;
+            }
+    		case DASHED_DOT_DOT: {
+    			pen = CreatePen  (PS_DASHDOTDOT, thickness, color);
+    			break;
+            }
+            case FILLED: { break; }
+		}
+	}
+
+    void square (SQ_FIGURE_TYPE figureType, ZS_LINE_TYPE lineType, int xAxis, int yAxis, int size,  int thickness) {
+		COORDS figure;
+		SQ_figureTypeSelector (figureType, figure, xAxis, yAxis, size, false, 0, 0);
+
+		if (lineType != FILLED) {
+			HPEN hPen;
+			lineTypeSelector (lineType, hPen, thickness, stdColor);
+			NORMAL_RECT (figure, hDCMem, hPen);
+		}
+		else FILLED_RECT (figure, hDCMem, stdColor);
+	}
+	void square (SQ_FIGURE_TYPE figureType, ZS_LINE_TYPE lineType, int xAxis, int yAxis, int size,  int thickness, ZS_COLORS C) {
+		COORDS figure;
+		SQ_figureTypeSelector (figureType, figure, xAxis, yAxis, size, false, 0, 0);
+
+		if (lineType != FILLED) {
+			HPEN hPen;
+			lineTypeSelector (lineType, hPen, thickness, C);
+			NORMAL_RECT (figure, hDCMem, hPen);
+		}
+		else FILLED_RECT (figure, hDCMem, stdColor);
+	}
+	void roundSquare (SQ_FIGURE_TYPE figureType, ZS_LINE_TYPE lineType, int xAxis, int yAxis, int size,  int thickness, int wRound, int hRound) {
+		COORDS figure;
+		SQ_figureTypeSelector (figureType, figure, xAxis, yAxis, size, true, wRound, hRound);
+
+		figure.xFinal += 1;
+		figure.yFinal += 1;
+
+		if (lineType != FILLED) {
+			HPEN hPen;
+			lineTypeSelector (lineType, hPen, thickness, stdColor);
+			NORMAL_ROUND_RECT (figure, hDCMem, hPen);
+		}
+		else FILLED_ROUND_RECT (figure, hDCMem, stdColor);
+	}
+	void roundSquare (SQ_FIGURE_TYPE figureType, ZS_LINE_TYPE lineType, int xAxis, int yAxis, int size,  int thickness, int wRound, int hRound, ZS_COLORS C) {
+		COORDS figure;
+		SQ_figureTypeSelector (figureType, figure, xAxis, yAxis, size, true, wRound, hRound);
+
+		figure.xFinal += 1;
+		figure.yFinal += 1;
+
+		if (lineType != FILLED) {
+			HPEN hPen;
+			lineTypeSelector (lineType, hPen, thickness, C);
+			NORMAL_ROUND_RECT (figure, hDCMem, hPen);
+		}
+		else FILLED_ROUND_RECT (figure, hDCMem, stdColor);
+	}
+	void circle (CI_FIGURE_TYPE figureType, ZS_LINE_TYPE lineType, int xAxis, int yAxis, int size,  int thickness) {
+		COORDS figure;
+		CI_figureTypeSelector (figureType, figure, xAxis, yAxis, size);
+
+		if (lineType != FILLED) {
+			HPEN hPen;
+			lineTypeSelector (lineType, hPen, thickness, stdColor);
+			NORMAL_CIRC (figure, hDCMem, hPen);
+		}
+		else FILLED_CIRC (figure, hDCMem, stdColor);
+	}
+	void circle (CI_FIGURE_TYPE figureType, ZS_LINE_TYPE lineType, int xAxis, int yAxis, int size,  int thickness, ZS_COLORS C) {
+		COORDS figure;
+		CI_figureTypeSelector (figureType, figure, xAxis, yAxis, size);
+
+		if (lineType != FILLED) {
+			HPEN hPen;
+			lineTypeSelector (lineType, hPen, thickness, C);
+			NORMAL_CIRC (figure, hDCMem, hPen);
+		}
+		else FILLED_CIRC (figure, hDCMem, stdColor);
+	}
+	void ellipse (RE_FIGURE_TYPE figureType, ZS_LINE_TYPE lineType, int xAxis, int yAxis, int wSize, int hSize, int thickness) {
+		COORDS figure;
+		EL_figureTypeSelector (figureType, figure, xAxis, yAxis, wSize, hSize);
+
+		if (lineType != FILLED) {
+			HPEN hPen;
+			lineTypeSelector (lineType, hPen, thickness, stdColor);
+			NORMAL_ELLI (figure, hDCMem, hPen);
+		}
+		else FILLED_ELLI (figure, hDCMem, stdColor);
+	}
+	void ellipse (RE_FIGURE_TYPE figureType, ZS_LINE_TYPE lineType, int xAxis, int yAxis, int wSize, int hSize, int thickness, ZS_COLORS C) {
+		COORDS figure;
+		EL_figureTypeSelector (figureType, figure, xAxis, yAxis, wSize, hSize);
+
+		if (lineType != FILLED) {
+			HPEN hPen;
+			lineTypeSelector (lineType, hPen, thickness, C);
+			NORMAL_ELLI (figure, hDCMem, hPen);
+		}
+		else FILLED_ELLI (figure, hDCMem, stdColor);
+	}
+	void rectangle (RE_FIGURE_TYPE figureType, ZS_LINE_TYPE lineType, int xAxis, int yAxis, int wSize, int hSize, int thickness) {
+		COORDS figure;
+		RE_figureTypeSelector (figureType, figure, xAxis, yAxis, wSize, hSize, false, 0, 0);
+
+		if (lineType != FILLED) {
+			HPEN hPen;
+			lineTypeSelector (lineType, hPen, thickness, stdColor);
+			NORMAL_RECT (figure, hDCMem, hPen);
+		}
+		else FILLED_RECT (figure, hDCMem, stdColor);
+	}
+	void rectangle (RE_FIGURE_TYPE figureType, ZS_LINE_TYPE lineType, int xAxis, int yAxis, int wSize, int hSize, int thickness, ZS_COLORS C) {
+		COORDS figure;
+		RE_figureTypeSelector (figureType, figure, xAxis, yAxis, wSize, hSize, false, 0, 0);
+
+		if (lineType != FILLED) {
+			HPEN hPen;
+			lineTypeSelector (lineType, hPen, thickness, colours[C]);
+			NORMAL_RECT (figure, hDCMem, hPen);
+		}
+		else FILLED_RECT (figure, hDCMem, colours[C]);
+	}
+	void roundRectangle (RE_FIGURE_TYPE figureType, ZS_LINE_TYPE lineType, int xAxis, int yAxis, int wSize, int hSize, int thickness, int wRound, int hRound) {
+		COORDS figure;
+		RE_figureTypeSelector (figureType, figure, xAxis, yAxis, wSize, hSize, true, wRound, hRound);
+
+		figure.xFinal += 1;
+		figure.yFinal += 1;
+
+		if (lineType != FILLED) {
+			HPEN hPen;
+			lineTypeSelector (lineType, hPen, thickness, stdColor);
+			NORMAL_ROUND_RECT (figure, hDCMem, hPen);
+		}
+		else FILLED_ROUND_RECT (figure, hDCMem, stdColor);
+	}
+	void roundRectangle (RE_FIGURE_TYPE figureType, ZS_LINE_TYPE lineType, int xAxis, int yAxis, int wSize, int hSize, int thickness, int wRound, int hRound, ZS_COLORS C) {
+		COORDS figure;
+		RE_figureTypeSelector (figureType, figure, xAxis, yAxis, wSize, hSize, true, wRound, hRound);
+
+		figure.xFinal += 1;
+		figure.yFinal += 1;
+
+		if (lineType != FILLED) {
+			HPEN hPen;
+			lineTypeSelector (lineType, hPen, thickness, C);
+			NORMAL_ROUND_RECT (figure, hDCMem, hPen);
+		}
+		else FILLED_ROUND_RECT (figure, hDCMem, stdColor);
+	}
+
+    void line (int xStart, int yStart, int xFinal, int yFinal, int thickness, ZS_LINE_TYPE lineType) {
+		BeginPath (hDCMem);
+		MoveToEx (hDCMem, int (xStart), int (yStart), NULL);
+		LineTo (hDCMem, int (xFinal), int (yFinal));
+		EndPath (hDCMem);
+		//HPEN hPen = CreatePen (PS_DOT, thickness, stdColor);
+		HPEN hPen;
+		lineTypeSelector (lineType, hPen, thickness, stdColor);
+		DELETE_LINE (hPen, hDCMem, hPen);
+	}
+	void line (int xStart, int yStart, int xFinal, int yFinal, int thickness, ZS_LINE_TYPE lineType, ZS_COLORS color) {
+		BeginPath (hDCMem);
+		MoveToEx (hDCMem, int (xStart), int (yStart), NULL);
+		LineTo (hDCMem, int (xFinal), int (yFinal));
+		EndPath (hDCMem);
+
+		// HPEN hPen = CreatePen (PS_SOLID, thickness, colours[color]);
+		HPEN hPen;
+		lineTypeSelector (lineType, hPen, thickness, colours[color]);
+		DELETE_LINE (hPen, hDCMem, hPen);
+	}
+	void point (int xAxis,  int yAxis) {
+		SetPixel (hDCMem, int (xAxis), int (yAxis), stdColor);
+	}
+	void point (int xAxis,  int yAxis, ZS_COLORS color) {
+		SetPixel (hDCMem, int (xAxis), int (yAxis), colours[color]);
+	}
+	void text (int xAxis,  int yAxis, const std::string line) {
+		SetTextColor (hDCMem, stdColor);
+		TextOut (hDCMem, int (xAxis), int (yAxis), line.c_str (), int (line.size ()));
+	}
+	void text (int xAxis,  int yAxis, const std::string line, ZS_COLORS color) {
+		SetTextColor (hDCMem, colours[color]);
+		TextOut (hDCMem, int (xAxis), int (yAxis), line.c_str (), int (line.size ()));
+	}
+	void text (int xAxis,  int yAxis, const std::string line, ZS_TEXT_ALIGN textAlign) {
+		SetTextAlign (hDCMem, textAlignSates[textAlign]);
+		SetTextColor (hDCMem, stdColor);
+		TextOut (hDCMem, int (xAxis), int (yAxis), line.c_str (), int (line.size ()));
+	}
+	void text (int xAxis,  int yAxis, const std::string line, ZS_TEXT_ALIGN textAlign, ZS_COLORS color) {
+		SetTextAlign (hDCMem, textAlignSates[textAlign]);
+		SetTextColor (hDCMem, colours[color]);
+		TextOut (hDCMem, int (xAxis), int (yAxis), line.c_str (), int (line.size ()));
+
+	}
 } /* ZedStack */
