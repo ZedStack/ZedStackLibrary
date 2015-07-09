@@ -108,10 +108,10 @@ namespace ZedStack {
 		void renderTile(int tile, ZS_COLORS C);
 		void renderTile(int tile);
 
-        void writeTile(int xTileAxis, int yTileAxis, std::string text);
-        void writeTile(int xTileAxis, int yTileAxis, std::string text, ZS_COLORS C);
-        void writeTile(int tile, std::string text);
-        void writeTile(int tile, std::string text, ZS_COLORS C);
+        void writeTile(int xTileAxis, int yTileAxis, std::string text, ZS_COLORS C, ZS_TEXT_ALIGN TA);
+        void writeTile(int xTileAxis, int yTileAxis, std::string text, ZS_TEXT_ALIGN TA);
+        void writeTile(int tile, std::string text, ZS_COLORS C, ZS_TEXT_ALIGN TA);
+        void writeTile(int tile, std::string text, ZS_TEXT_ALIGN TA);
 
 		void clear();
 		void clearAll();
@@ -119,8 +119,10 @@ namespace ZedStack {
 
 		void getCoordsFromTile(int tile, int& xAxis, int& yAxis);
 		void getCoordsFromTile(int tile, int& xStart, int& yStart, int& xFinal, int& yFinal);
+        void getCoordsFromTile(int xTileAxis, int yTileAxis, int& xAxis, int& yAxis);
+        void getCoordsFromTile(int xTileAxis, int yTileAxis, int& xStart, int& yStart, int& xFinal, int& yFinal);
 
-		int getTileFromCoords(int xAxis, int yAxis);
+		int getTileFromCoords(int xTileAxis, int yTileAxis);
 		int getWidth();
 		int getHeight();
 		int getTileWidth();

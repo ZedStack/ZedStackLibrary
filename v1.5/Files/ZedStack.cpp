@@ -83,177 +83,177 @@ void newMemDC (int width, int height) {
 }
 LRESULT CALLBACK windowProcedure (HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
 	switch (message) {
-	case WM_SIZE: {
-		RECT rect;
-		GetClientRect (hWnd, &rect);
-		int width = rect.right - rect.left;
-		int height = rect.bottom - rect.top;
+    	case WM_SIZE: {
+    		RECT rect;
+    		GetClientRect (hWnd, &rect);
+    		int width = rect.right - rect.left;
+    		int height = rect.bottom - rect.top;
 
-		if (width == 0 && height == 0) break;
+    		if (width == 0 && height == 0) break;
 
-		if (hDCMem == NULL || width != stdWidth || height != stdHeight) {
-			newMemDC (width, height);
-			mayCallMain ();
-		}
-		break;
-	}
-	case WM_SIZING: {
-		RECT* rect = (RECT*)lParam;
+    		if (hDCMem == NULL || width != stdWidth || height != stdHeight) {
+    			newMemDC (width, height);
+    			mayCallMain ();
+    		}
+    		break;
+    	}
+    	case WM_SIZING: {
+    		RECT* rect = (RECT*)lParam;
 
-		int width, height;
-		realFrame (stdWidth, stdHeight, width, height);
+    		int width, height;
+    		realFrame (stdWidth, stdHeight, width, height);
 
-		switch (wParam) {
-		case WMSZ_BOTTOM:		{ rect->bottom = rect->top + height; break; }
-		case WMSZ_TOP:			{ rect->top = rect->bottom - height; break; }
-		case WMSZ_RIGHT:		{ rect->right = rect->left + width;  break; }
-		case WMSZ_LEFT:			{ rect->left = rect->right - width;  break; }
-		case WMSZ_TOPLEFT:		{ rect->top = rect->bottom - height; rect->left = rect->right - width; break; }
-		case WMSZ_TOPRIGHT:		{ rect->top = rect->bottom - height; rect->left = rect->right + width; break; }
-		case WMSZ_BOTTOMLEFT:	{ rect->top = rect->bottom + height; rect->left = rect->right - width; break; }
-		case WMSZ_BOTTOMRIGHT:	{ rect->top = rect->bottom + height; rect->left = rect->right + width; break; }
-		}
-	}
-	case WM_PAINT: {
-		PAINTSTRUCT paintStruct;
-		HDC hDC = BeginPaint (hWnd, &paintStruct);
-		SelectObject (hDCMem, hBitmap);
+    		switch (wParam) {
+        		case WMSZ_BOTTOM:		{ rect->bottom = rect->top + height; break; }
+        		case WMSZ_TOP:			{ rect->top = rect->bottom - height; break; }
+        		case WMSZ_RIGHT:		{ rect->right = rect->left + width;  break; }
+        		case WMSZ_LEFT:			{ rect->left = rect->right - width;  break; }
+        		case WMSZ_TOPLEFT:		{ rect->top = rect->bottom - height; rect->left = rect->right - width; break; }
+        		case WMSZ_TOPRIGHT:		{ rect->top = rect->bottom - height; rect->left = rect->right + width; break; }
+        		case WMSZ_BOTTOMLEFT:	{ rect->top = rect->bottom + height; rect->left = rect->right - width; break; }
+        		case WMSZ_BOTTOMRIGHT:	{ rect->top = rect->bottom + height; rect->left = rect->right + width; break; }
+    		}
+    	}
+    	case WM_PAINT: {
+    		PAINTSTRUCT paintStruct;
+    		HDC hDC = BeginPaint (hWnd, &paintStruct);
+    		SelectObject (hDCMem, hBitmap);
 
-		if (hBitmap != NULL) BitBlt (hDC, 0, 0, stdWidth, stdHeight, hDCMem, 0, 0, SRCCOPY);
-		EndPaint (hWnd, &paintStruct);
-		break;
-	}
-	case WM_KEYDOWN: {
-		bool keyValue = false;
+    		if (hBitmap != NULL) BitBlt (hDC, 0, 0, stdWidth, stdHeight, hDCMem, 0, 0, SRCCOPY);
+    		EndPaint (hWnd, &paintStruct);
+    		break;
+    	}
+    	case WM_KEYDOWN: {
+    		bool keyValue = false;
 
-		//! A - Z:
-		keyValue |= (wParam >= 65 && wParam <= 90);
+    		//! A - Z:
+    		keyValue |= (wParam >= 65 && wParam <= 90);
 
-		//! Escape:
-		keyValue |= (wParam == VK_ESCAPE);
+    		//! Escape:
+    		keyValue |= (wParam == VK_ESCAPE);
 
-		//! Space bar:
-		keyValue |= (wParam == VK_SPACE);
+    		//! Space bar:
+    		keyValue |= (wParam == VK_SPACE);
 
-		//! Return:
-		keyValue |= (wParam == VK_RETURN);
+    		//! Return:
+    		keyValue |= (wParam == VK_RETURN);
 
-		//! Arrows:
-		keyValue |= (wParam == VK_LEFT || wParam == VK_RIGHT || wParam == VK_UP || wParam == VK_DOWN);
+    		//! Arrows:
+    		keyValue |= (wParam == VK_LEFT || wParam == VK_RIGHT || wParam == VK_UP || wParam == VK_DOWN);
 
-		//! F1 - F10:
-		for (unsigned int i = 0; i < 10; i++) keyValue |= (wParam == (VK_F1 + i));
+    		//! F1 - F10:
+    		for (unsigned int i = 0; i < 10; i++) keyValue |= (wParam == (VK_F1 + i));
 
-		//! 0 - 9:
-		keyValue |= (wParam >= 48 && wParam <= 57);
+    		//! 0 - 9:
+    		keyValue |= (wParam >= 48 && wParam <= 57);
 
-		//! NP-0 - NP-9:
-		keyValue |= (wParam >= 96 && wParam <= 105);
+    		//! NP-0 - NP-9:
+    		keyValue |= (wParam >= 96 && wParam <= 105);
 
-		if (keyValue) _key.push (wParam);
-		break;
-	}
-	case WM_MOUSEMOVE: {
-		TRACKMOUSEEVENT mouseEvent;
-		mouseEvent.cbSize = sizeof (TRACKMOUSEEVENT);
-		mouseEvent.hwndTrack = hWnd;
-		mouseEvent.dwFlags = TME_LEAVE; // TODO do some research about "TME_HOVER"
-		mouseEvent.dwHoverTime = HOVER_DEFAULT;
-		TrackMouseEvent (&mouseEvent);
+    		if (keyValue) _key.push (wParam);
+    		break;
+    	}
+    	case WM_MOUSEMOVE: {
+    		TRACKMOUSEEVENT mouseEvent;
+    		mouseEvent.cbSize = sizeof (TRACKMOUSEEVENT);
+    		mouseEvent.hwndTrack = hWnd;
+    		mouseEvent.dwFlags = TME_LEAVE; // TODO do some research about "TME_HOVER"
+    		mouseEvent.dwHoverTime = HOVER_DEFAULT;
+    		TrackMouseEvent (&mouseEvent);
 
-		MOUSEINSIDE = true;
+    		MOUSEINSIDE = true;
 
-		xMouseAxis = GET_X_LPARAM (lParam);
-		yMouseAxis = GET_Y_LPARAM (lParam);
+    		xMouseAxis = GET_X_LPARAM (lParam);
+    		yMouseAxis = GET_Y_LPARAM (lParam);
 
-		LBUTTON[UP]		=  !(wParam & MK_LBUTTON);
-		LBUTTON[DOWN]	=    wParam & MK_LBUTTON;
-		RBUTTON[UP]		=  !(wParam & MK_RBUTTON);
-		RBUTTON[DOWN]	= !!(wParam & MK_RBUTTON);
-		MBUTTON[UP]		=  !(wParam & MK_MBUTTON);
-		MBUTTON[DOWN]	= !!(wParam & MK_MBUTTON);
-		break;
-	}
-	case WM_MOUSELEAVE: {
-		MOUSEINSIDE = false;
-		break;
-	}
-	case WM_MBUTTONUP: {
-		MBUTTON[UP] = true;
-		if (MBUTTON[SNGCK_1]) MBUTTON[SNGCK_2] = true;
+    		LBUTTON[UP]		=  !(wParam & MK_LBUTTON);
+    		LBUTTON[DOWN]	=    wParam & MK_LBUTTON;
+    		RBUTTON[UP]		=  !(wParam & MK_RBUTTON);
+    		RBUTTON[DOWN]	= !!(wParam & MK_RBUTTON);
+    		MBUTTON[UP]		=  !(wParam & MK_MBUTTON);
+    		MBUTTON[DOWN]	= !!(wParam & MK_MBUTTON);
+    		break;
+    	}
+    	case WM_MOUSELEAVE: {
+    		MOUSEINSIDE = false;
+    		break;
+    	}
+    	case WM_MBUTTONUP: {
+    		MBUTTON[UP] = true;
+    		if (MBUTTON[SNGCK_1]) MBUTTON[SNGCK_2] = true;
 
-		MBUTTON[DOWN] = false;
-		MBUTTON[DBLCK] = false;
-		break;
-	}
-	case WM_MBUTTONDOWN: {
-		MBUTTON[DOWN] = true;
-		MBUTTON[SNGCK_1] = true;
+    		MBUTTON[DOWN] = false;
+    		MBUTTON[DBLCK] = false;
+    		break;
+    	}
+    	case WM_MBUTTONDOWN: {
+    		MBUTTON[DOWN] = true;
+    		MBUTTON[SNGCK_1] = true;
 
-		MBUTTON[UP] = false;
-		break;
-	}
-	case WM_MBUTTONDBLCLK: {
-		MBUTTON[DBLCK] = true;
+    		MBUTTON[UP] = false;
+    		break;
+    	}
+    	case WM_MBUTTONDBLCLK: {
+    		MBUTTON[DBLCK] = true;
 
-		MBUTTON[SNGCK_1] = false;
-		MBUTTON[SNGCK_2] = false;
-		break;
-	}
-	case WM_LBUTTONUP: {
-		LBUTTON[UP] = true;
-		if (LBUTTON[SNGCK_1]) LBUTTON[SNGCK_2] = true;
+    		MBUTTON[SNGCK_1] = false;
+    		MBUTTON[SNGCK_2] = false;
+    		break;
+    	}
+    	case WM_LBUTTONUP: {
+    		LBUTTON[UP] = true;
+    		if (LBUTTON[SNGCK_1]) LBUTTON[SNGCK_2] = true;
 
-		LBUTTON[DOWN] = false;
-		LBUTTON[DBLCK] = false;
-		break;
-	}
-	case WM_LBUTTONDOWN: {
-		LBUTTON[DOWN] = true;
-		LBUTTON[SNGCK_1] = true;
+    		LBUTTON[DOWN] = false;
+    		LBUTTON[DBLCK] = false;
+    		break;
+    	}
+    	case WM_LBUTTONDOWN: {
+    		LBUTTON[DOWN] = true;
+    		LBUTTON[SNGCK_1] = true;
 
-		LBUTTON[UP] = false;
-		break;
-	}
-	case WM_LBUTTONDBLCLK: {
-		LBUTTON[DBLCK] = true;
+    		LBUTTON[UP] = false;
+    		break;
+    	}
+    	case WM_LBUTTONDBLCLK: {
+    		LBUTTON[DBLCK] = true;
 
-		LBUTTON[SNGCK_1] = false;
-		LBUTTON[SNGCK_2] = false;
-		break;
-	}
-	case WM_RBUTTONUP: {
-		RBUTTON[UP] = true;
-		if (RBUTTON[SNGCK_1]) RBUTTON[SNGCK_2] = true;
+    		LBUTTON[SNGCK_1] = false;
+    		LBUTTON[SNGCK_2] = false;
+    		break;
+    	}
+    	case WM_RBUTTONUP: {
+    		RBUTTON[UP] = true;
+    		if (RBUTTON[SNGCK_1]) RBUTTON[SNGCK_2] = true;
 
-		RBUTTON[DOWN] = false;
-		RBUTTON[DBLCK] = false;
-		break;
-	}
-	case WM_RBUTTONDOWN: {
-		RBUTTON[DOWN] = true;
-		RBUTTON[SNGCK_1] = true;
+    		RBUTTON[DOWN] = false;
+    		RBUTTON[DBLCK] = false;
+    		break;
+    	}
+    	case WM_RBUTTONDOWN: {
+    		RBUTTON[DOWN] = true;
+    		RBUTTON[SNGCK_1] = true;
 
-		RBUTTON[UP] = false;
-		break;
-	}
-	case WM_RBUTTONDBLCLK: {
-		MBUTTON[DBLCK] = true;
+    		RBUTTON[UP] = false;
+    		break;
+    	}
+    	case WM_RBUTTONDBLCLK: {
+    		MBUTTON[DBLCK] = true;
 
-		MBUTTON[SNGCK_1] = false;
-		MBUTTON[SNGCK_2] = false;
-		break;
-	}
-	case WM_DESTROY: {
-		DeleteObject (hBitmap);
-		DeleteDC (hDCMem);
-		PostQuitMessage (0);
-		break;
-	}
-	default: {
-		return DefWindowProc (hWnd, message, wParam, lParam);
-	}
-	}
+    		MBUTTON[SNGCK_1] = false;
+    		MBUTTON[SNGCK_2] = false;
+    		break;
+    	}
+    	case WM_DESTROY: {
+    		DeleteObject (hBitmap);
+    		DeleteDC (hDCMem);
+    		PostQuitMessage (0);
+    		break;
+    	}
+    	default: {
+    		return DefWindowProc (hWnd, message, wParam, lParam);
+    	}
+    	}
 	return 0;
 }
 int WINAPI WinMain (HINSTANCE hThisInstance, HINSTANCE hPrevInstance, LPSTR lpszArgument, int nFunsterStil) {
@@ -535,5 +535,67 @@ namespace ZedStack {
         renderTile (tile, CURRENT_COLOR);
     }
     // TODO: Finish this class. branch and create a "master" class "TABLE_BASIC" for "GRID", "PIXEL_GRID" and "TABLE".
+    void GRID::writeTile(int xTileAxis, int yTileAxis, std::string text, ZS_COLORS C, ZS_TEXT_ALIGN TA) {
+        int xAxis, yAxis;
+        getCoordsFromTile (xTileAxis, yTileAxis, xStart, yStart);
 
+        switch (TA) {
+            case TOP_LEFT: { break; /* Do nothing... (by default) */ }
+            case TOP_RIGHT: { xAxis += getTileWidth (); break; }
+            case TOP_CENTER: { xAxis += getTileWidth () / 2; break; }
+
+            case BOTTOM_LEFT: { yAxis += getTileHeight (); break; }
+            case BOTTOM_RIGHT: { xAxis += getTileWidth (); yAxis += getTileHeight (); break; }
+            case BOTTOM_CENTER: { xAxis += getTileWidth () / 2; yAxis += getTileHeight (); break; }
+
+            case TOP: { break; /* Do nothing... (By default) */ }
+            case LEFT: { break; /* Do nothing... (By defua  ) */ }
+            case BOTTOM: { yAxis += getTileHeight (); break; }
+            case RIGHT: { xAxis += getTileWidth (); break; }
+            case CENTER: { xAxis += getTileWidth () / 2; break; }
+        }
+        text (xAxis, yAxis, text, TA, C);
+    }
+    void GRID::writeTile (int xTileAxis, int yTileAxis, std::string text, ZS_TEXT_ALIGN TA) {
+        writeTile (xTileAxis, yTileAxis, text, CURRENT_COLOR, TA);
+    }
+
+    void GRID::getCoordsFromTile (int tile, int& xAxis, int& yAxis) {
+        xAxis = (tile % getColumns ()) * getTileWidth ();
+        yAxis = (tile / getColumns ()) * getTileHeight ();
+    }
+    void GRID::getCoordsFromTile (int tile, int& xStart, int& yStart, int& xFinal, int& yFinal) {
+        getTileFromCoords (tile, xStart, yStart);
+        xFinal = xStart + getTileWidth ();
+        yFinal = yStart + getTileHeight ();
+    }
+    void GRID::getCoordsFromTile (int xTileAxis, int yTileAxis, int& xAxis, int& yAxis) {
+        getCoordsFromTile (getTileFromCoords (xTileAxis, yTileAxis), xAxis, yAxis);
+    }
+    void GRID::getCoordsFromTile (int xTileAxis, int yTileAxis, int& xStart, int& yStart, int& xFinal, int& yFinal) {
+        getTileFromCoords (xTileAxis, yTileAxis, xStart, yStart);
+        xFinal = xStart + getTileWidth ();
+        yFinal = yStart + getTileHeight ();
+    }
+    int GRID::getTileFromCoords (int xTileAxis, int yTileAxis) {
+        return (yTileAxis * getColumns ()) + xTileAxis;
+    }
+    int GRID::getWidth () {
+        return this -> WIDTH;
+    }
+    int GRID::getHeight () {
+        return this -> HEIGHT;
+    }
+    int GRID::getTileWidth () {
+        return this -> TILE_WIDTH;
+    }
+    int GRID::getTileHeight () {
+        return this -> TILE_HEIGHT;
+    }
+    int GRID::getRows () {
+        return this -> ROWS;
+    }
+    int GRID::getColumns () {
+        return this -> COLUMNS;
+    }
 } /* ZedStack */
