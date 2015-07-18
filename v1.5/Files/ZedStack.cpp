@@ -380,8 +380,7 @@ namespace ZedStack {
     }
     bool MOUSE::checkAndGetCoords (int& xAxis, int& yAxis) {
         if (MOUSE_INSIDE) {
-            xAxis = xMouseAxis;
-            yAxis = yMouseAxis;
+            getCoords (xAxis, yAxis);
             return true;
         }
         else {
@@ -800,44 +799,33 @@ namespace ZedStack {
             }
         }
     }
-    void lineTypeSelector (ZS_LINE_TYPE lineType, HPEN& pen, int thickness, COLORREF color) {
+    void lineTypeSelector (ZS_LINE_TYPE lineType, HPEN& pen, int thickness, ZS_COLORS color) {
 		switch (lineType) {
     		case SOLID:
     		case BORDER: {
-    			pen = CreatePen  (PS_SOLID, thickness, color);
+    			pen = CreatePen  (PS_SOLID, thickness, colours[color]);
     			break;
             }
     		case DOTTED: {
-    			pen = CreatePen  (PS_DOT, thickness, color);
+    			pen = CreatePen  (PS_DOT, thickness, colours[color]);
     			break;
             }
     		case DASHED: {
-    			pen = CreatePen  (PS_DASH, thickness, color);
+    			pen = CreatePen  (PS_DASH, thickness, colours[color]);
     			break;
             }
     		case DASHED_DOT: {
-    			pen = CreatePen  (PS_DASHDOT, thickness, color);
+    			pen = CreatePen  (PS_DASHDOT, thickness, colours[color]);
     			break;
             }
     		case DASHED_DOT_DOT: {
-    			pen = CreatePen  (PS_DASHDOTDOT, thickness, color);
+    			pen = CreatePen  (PS_DASHDOTDOT, thickness, colours[color]);
     			break;
             }
             case FILLED: { break; }
 		}
 	}
 
-    void square (SQ_FIGURE_TYPE figureType, ZS_LINE_TYPE lineType, int xAxis, int yAxis, int size,  int thickness) {
-		COORDS figure;
-		SQ_figureTypeSelector (figureType, figure, xAxis, yAxis, size, false, 0, 0);
-
-		if (lineType != FILLED) {
-			HPEN hPen;
-			lineTypeSelector (lineType, hPen, thickness, stdColor);
-			NORMAL_RECT (figure, hDCMem, hPen);
-		}
-		else FILLED_RECT (figure, hDCMem, stdColor);
-	}
 	void square (SQ_FIGURE_TYPE figureType, ZS_LINE_TYPE lineType, int xAxis, int yAxis, int size,  int thickness, ZS_COLORS C) {
 		COORDS figure;
 		SQ_figureTypeSelector (figureType, figure, xAxis, yAxis, size, false, 0, 0);
@@ -847,21 +835,10 @@ namespace ZedStack {
 			lineTypeSelector (lineType, hPen, thickness, C);
 			NORMAL_RECT (figure, hDCMem, hPen);
 		}
-		else FILLED_RECT (figure, hDCMem, stdColor);
+		else FILLED_RECT (figure, hDCMem, colours[C]);
 	}
-	void roundSquare (SQ_FIGURE_TYPE figureType, ZS_LINE_TYPE lineType, int xAxis, int yAxis, int size,  int thickness, int wRound, int hRound) {
-		COORDS figure;
-		SQ_figureTypeSelector (figureType, figure, xAxis, yAxis, size, true, wRound, hRound);
-
-		figure.xFinal += 1;
-		figure.yFinal += 1;
-
-		if (lineType != FILLED) {
-			HPEN hPen;
-			lineTypeSelector (lineType, hPen, thickness, stdColor);
-			NORMAL_ROUND_RECT (figure, hDCMem, hPen);
-		}
-		else FILLED_ROUND_RECT (figure, hDCMem, stdColor);
+    void square (SQ_FIGURE_TYPE figureType, ZS_LINE_TYPE lineType, int xAxis, int yAxis, int size,  int thickness) {
+		square (figureType, lineType, xAxis, yAxis, size, thickness, CURRENT_COLOR);
 	}
 	void roundSquare (SQ_FIGURE_TYPE figureType, ZS_LINE_TYPE lineType, int xAxis, int yAxis, int size,  int thickness, int wRound, int hRound, ZS_COLORS C) {
 		COORDS figure;
@@ -875,18 +852,10 @@ namespace ZedStack {
 			lineTypeSelector (lineType, hPen, thickness, C);
 			NORMAL_ROUND_RECT (figure, hDCMem, hPen);
 		}
-		else FILLED_ROUND_RECT (figure, hDCMem, stdColor);
+		else FILLED_ROUND_RECT (figure, hDCMem, colours[C]);
 	}
-	void circle (CI_FIGURE_TYPE figureType, ZS_LINE_TYPE lineType, int xAxis, int yAxis, int size,  int thickness) {
-		COORDS figure;
-		CI_figureTypeSelector (figureType, figure, xAxis, yAxis, size);
-
-		if (lineType != FILLED) {
-			HPEN hPen;
-			lineTypeSelector (lineType, hPen, thickness, stdColor);
-			NORMAL_CIRC (figure, hDCMem, hPen);
-		}
-		else FILLED_CIRC (figure, hDCMem, stdColor);
+	void roundSquare (SQ_FIGURE_TYPE figureType, ZS_LINE_TYPE lineType, int xAxis, int yAxis, int size,  int thickness, int wRound, int hRound) {
+		roundSquare (figureType, lineType, xAxis, yAxis, size, thickness, wRound, hRound, CURRENT_COLOR);
 	}
 	void circle (CI_FIGURE_TYPE figureType, ZS_LINE_TYPE lineType, int xAxis, int yAxis, int size,  int thickness, ZS_COLORS C) {
 		COORDS figure;
@@ -897,18 +866,10 @@ namespace ZedStack {
 			lineTypeSelector (lineType, hPen, thickness, C);
 			NORMAL_CIRC (figure, hDCMem, hPen);
 		}
-		else FILLED_CIRC (figure, hDCMem, stdColor);
+		else FILLED_CIRC (figure, hDCMem, colours[C]);
 	}
-	void ellipse (RE_FIGURE_TYPE figureType, ZS_LINE_TYPE lineType, int xAxis, int yAxis, int wSize, int hSize, int thickness) {
-		COORDS figure;
-		EL_figureTypeSelector (figureType, figure, xAxis, yAxis, wSize, hSize);
-
-		if (lineType != FILLED) {
-			HPEN hPen;
-			lineTypeSelector (lineType, hPen, thickness, stdColor);
-			NORMAL_ELLI (figure, hDCMem, hPen);
-		}
-		else FILLED_ELLI (figure, hDCMem, stdColor);
+	void circle (CI_FIGURE_TYPE figureType, ZS_LINE_TYPE lineType, int xAxis, int yAxis, int size,  int thickness) {
+        circle (figureType, lineType, xAxis, yAxis, size, thickness, CURRENT_COLOR);
 	}
 	void ellipse (RE_FIGURE_TYPE figureType, ZS_LINE_TYPE lineType, int xAxis, int yAxis, int wSize, int hSize, int thickness, ZS_COLORS C) {
 		COORDS figure;
@@ -919,18 +880,10 @@ namespace ZedStack {
 			lineTypeSelector (lineType, hPen, thickness, C);
 			NORMAL_ELLI (figure, hDCMem, hPen);
 		}
-		else FILLED_ELLI (figure, hDCMem, stdColor);
+		else FILLED_ELLI (figure, hDCMem, colours[C]);
 	}
-	void rectangle (RE_FIGURE_TYPE figureType, ZS_LINE_TYPE lineType, int xAxis, int yAxis, int wSize, int hSize, int thickness) {
-		COORDS figure;
-		RE_figureTypeSelector (figureType, figure, xAxis, yAxis, wSize, hSize, false, 0, 0);
-
-		if (lineType != FILLED) {
-			HPEN hPen;
-			lineTypeSelector (lineType, hPen, thickness, stdColor);
-			NORMAL_RECT (figure, hDCMem, hPen);
-		}
-		else FILLED_RECT (figure, hDCMem, stdColor);
+	void ellipse (RE_FIGURE_TYPE figureType, ZS_LINE_TYPE lineType, int xAxis, int yAxis, int wSize, int hSize, int thickness) {
+		ellipse (figureType, lineType, xAxis, yAxis, wSize, hSize, thickness, CURRENT_COLOR);
 	}
 	void rectangle (RE_FIGURE_TYPE figureType, ZS_LINE_TYPE lineType, int xAxis, int yAxis, int wSize, int hSize, int thickness, ZS_COLORS C) {
 		COORDS figure;
@@ -938,24 +891,13 @@ namespace ZedStack {
 
 		if (lineType != FILLED) {
 			HPEN hPen;
-			lineTypeSelector (lineType, hPen, thickness, colours[C]);
+			lineTypeSelector (lineType, hPen, thickness, C);
 			NORMAL_RECT (figure, hDCMem, hPen);
 		}
 		else FILLED_RECT (figure, hDCMem, colours[C]);
 	}
-	void roundRectangle (RE_FIGURE_TYPE figureType, ZS_LINE_TYPE lineType, int xAxis, int yAxis, int wSize, int hSize, int thickness, int wRound, int hRound) {
-		COORDS figure;
-		RE_figureTypeSelector (figureType, figure, xAxis, yAxis, wSize, hSize, true, wRound, hRound);
-
-		figure.xFinal += 1;
-		figure.yFinal += 1;
-
-		if (lineType != FILLED) {
-			HPEN hPen;
-			lineTypeSelector (lineType, hPen, thickness, stdColor);
-			NORMAL_ROUND_RECT (figure, hDCMem, hPen);
-		}
-		else FILLED_ROUND_RECT (figure, hDCMem, stdColor);
+	void rectangle (RE_FIGURE_TYPE figureType, ZS_LINE_TYPE lineType, int xAxis, int yAxis, int wSize, int hSize, int thickness) {
+		rectangle (figureType, lineType, xAxis, yAxis, wSize, hSize, thickness, CURRENT_COLOR);
 	}
 	void roundRectangle (RE_FIGURE_TYPE figureType, ZS_LINE_TYPE lineType, int xAxis, int yAxis, int wSize, int hSize, int thickness, int wRound, int hRound, ZS_COLORS C) {
 		COORDS figure;
@@ -969,18 +911,14 @@ namespace ZedStack {
 			lineTypeSelector (lineType, hPen, thickness, C);
 			NORMAL_ROUND_RECT (figure, hDCMem, hPen);
 		}
-		else FILLED_ROUND_RECT (figure, hDCMem, stdColor);
+		else FILLED_ROUND_RECT (figure, hDCMem, colours[C]);
+	}
+	void roundRectangle (RE_FIGURE_TYPE figureType, ZS_LINE_TYPE lineType, int xAxis, int yAxis, int wSize, int hSize, int thickness, int wRound, int hRound) {
+		roundRectangle (figureType, lineType, xAxis, yAxis, wSize, hSize, thickness, wRound, hRound, CURRENT_COLOR);
 	}
 
     void line (int xStart, int yStart, int xFinal, int yFinal, int thickness, ZS_LINE_TYPE lineType) {
-		BeginPath (hDCMem);
-		MoveToEx (hDCMem, int (xStart), int (yStart), NULL);
-		LineTo (hDCMem, int (xFinal), int (yFinal));
-		EndPath (hDCMem);
-		//HPEN hPen = CreatePen (PS_DOT, thickness, stdColor);
-		HPEN hPen;
-		lineTypeSelector (lineType, hPen, thickness, stdColor);
-		DELETE_LINE (hPen, hDCMem, hPen);
+		line (xStart, yStart, xFinal, yFinal, thickness, lineType, CURRENT_COLOR);
 	}
 	void line (int xStart, int yStart, int xFinal, int yFinal, int thickness, ZS_LINE_TYPE lineType, ZS_COLORS color) {
 		BeginPath (hDCMem);
@@ -988,9 +926,8 @@ namespace ZedStack {
 		LineTo (hDCMem, int (xFinal), int (yFinal));
 		EndPath (hDCMem);
 
-		// HPEN hPen = CreatePen (PS_SOLID, thickness, colours[color]);
 		HPEN hPen;
-		lineTypeSelector (lineType, hPen, thickness, colours[color]);
+		lineTypeSelector (lineType, hPen, thickness, color);
 		DELETE_LINE (hPen, hDCMem, hPen);
 	}
 	void point (int xAxis,  int yAxis) {
